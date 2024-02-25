@@ -24,7 +24,7 @@ public class Grid_Script : MonoBehaviour
     public int yDim;
 
     private Dictionary<BallType, GameObject> ballPrefabDict;
-    private GameObject[,] balls;
+    private Ball_Script[,] balls;
     
     void Start()
     {
@@ -46,14 +46,22 @@ public class Grid_Script : MonoBehaviour
             }
         }
 
-        balls = new GameObject[xDim, yDim];
+        balls = new Ball_Script[xDim, yDim];
         for(int x = 0; x<xDim; x++)
         {
             for (int y = 0;y < yDim; y++)
             {
-                balls[x, y] = (GameObject)Instantiate(ballPrefabDict[BallType.NORMAL], GetWorldPosition(x, y), Quaternion.identity);
-                balls[x, y].name = "Ball(" + x + "," + y + ")";
-                balls[x, y].transform.parent = transform;
+                GameObject newBall = (GameObject)Instantiate(ballPrefabDict[BallType.NORMAL], GetWorldPosition(x, y), Quaternion.identity);
+                newBall.name = "Ball(" + x + "," + y + ")";
+                newBall.transform.parent = transform;
+
+                balls[x, y] = newBall.GetComponent<Ball_Script>();
+                balls[x, y].Init(x, y, this, BallType.NORMAL);
+
+                if (balls[x, y].IsMoveable())
+                {
+                    balls[x, y].MoveableComponent.Move(x, y);
+                }
             }
         }
     }
@@ -64,7 +72,7 @@ public class Grid_Script : MonoBehaviour
         
     }
 
-    Vector2 GetWorldPosition(int x, int y)
+    public Vector2 GetWorldPosition(int x, int y)
     {
         return new Vector2(transform.position.x - xDim/2.0f + x, transform.position.y - yDim / 2.0f + y);
     }
